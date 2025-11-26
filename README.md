@@ -1,16 +1,3 @@
-# GS_GIZMO
-
-![Main](https://github.com/GlitchOo/gs_gizmo/actions/workflows/main.yml/badge.svg)
-
-This is a simple gizmo for RedM similar to the gizmo in FxDK and FiveM.
-Can be useful for creating an intuitive experience in housing systems.
-
-[Example - Camera Mode Enabled](https://youtu.be/sywltl8HtcY)
-
-[Example - Camera Mode Disabled](https://youtu.be/bqQzilknLmI)
-
-![Preview 1](https://i.gyazo.com/fd89f9a9018aa44f640db5d22787b9a7.jpg)
-
 ## Export (Client)
 
 You can override the config via the export
@@ -80,3 +67,4 @@ npm run build
 
 # Credits
 [DemiAutomatic](https://github.com/DemiAutomatic)
+[GlitchOo](https://github.com/GlitchOo)
