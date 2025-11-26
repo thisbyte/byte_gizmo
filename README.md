@@ -12,7 +12,7 @@ You can override the config via the export
 - MaxY: Override the MaxY (Camera Mode)
 - MovementSpeed: Override movement speed (Camera Mode)
 - Title: Override the default Gizmo-label
-- Prompts: Override prompt configurations ("title", "secondTitle", "button", "mode", "options")
+- Prompts: Override prompt configurations ("title", "secondTitle", "button", "mode", "options") or add custom-prompts
 
 ```lua
 --- Toggle the gizmo on the entity
