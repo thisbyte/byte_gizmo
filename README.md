@@ -1,3 +1,7 @@
+# byte_gizmo
+
+byte_gizmo is a compatible fork of [gs_gizmo](https://github.com/GlitchOo/gs_gizmo), which has been extended with some additional configuration options.
+
 ## Export (Client)
 
 You can override the config via the export
@@ -7,6 +11,8 @@ You can override the config via the export
 - MinY: Override the MinY (Camera Mode)
 - MaxY: Override the MaxY (Camera Mode)
 - MovementSpeed: Override movement speed (Camera Mode)
+- Title: Override the default Gizmo-label
+- Prompts: Override prompt configurations ("title", "secondTitle", "button", "mode", "options")
 
 ```lua
 --- Toggle the gizmo on the entity
