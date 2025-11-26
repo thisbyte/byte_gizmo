@@ -10,6 +10,8 @@ local maxY
 local movementSpeed
 local stored
 local hookedFunc
+local promptTitle = _('Gizmo')
+local promptSettings = {}
 
 --- Export Handler
 --- @param resourceName string
@@ -172,6 +174,91 @@ function ToggleGizmo(entity, cfg, allowPlace)
     maxY = (cfg?.MaxY == nil and Config.MaxY) or cfg.MaxY
     movementSpeed = (cfg?.MovementSpeed == nil and Config.MovementSpeed) or cfg.MovementSpeed
     mode = 'translate'
+	
+	promptTitle = (cfg?.Title == nil and _('Gizmo')) or cfg.Title
+	
+	promptSettings = {
+		["translate"] = {
+			["title"] = (cfg?.Prompts?.translate?.title == nil and _('rotate')) or cfg.Prompts.translate.title,
+			["secondTitle"] = (cfg?.Prompts?.translate?.secondTitle == nil and _('translate')) or cfg.Prompts.translate.secondTitle,
+			["button"] = (cfg?.Prompts?.translate?.button == nil and U.Keys[Config.Keybinds.ToggleMode]) or cfg.Prompts.translate.button,
+			["enabled"] = true,
+			["mode"] = (cfg?.Prompts?.translate?.mode == nil and "click") or cfg.Prompts.translate.mode,
+			["options"] = (cfg?.Prompts?.translate?.options == nil and {tab = 0}) or cfg.Prompts.translate.options,
+		},
+		["snap"] = {
+			["title"] = (cfg?.Prompts?.snap?.title == nil and _('Snap To Ground')) or cfg.Prompts.snap.title,
+			["secondTitle"] = cfg?.Prompts?.snap?.secondTitle,
+			["button"] = (cfg?.Prompts?.snap?.button == nil and U.Keys[Config.Keybinds.SnapToGround]) or cfg.Prompts.snap.button,
+			["enabled"] = true,
+			["mode"] = (cfg?.Prompts?.snap?.mode == nil and "click") or cfg.Prompts.snap.mode,
+			["options"] = (cfg?.Prompts?.snap?.options == nil and {tab = 0}) or cfg.Prompts.snap.options,
+		},
+		["done"] = {
+			["title"] = (cfg?.Prompts?.done?.title == nil and _('Done Editing')) or cfg.Prompts.done.title,
+			["secondTitle"] = cfg?.Prompts?.done?.secondTitle,
+			["button"] = (cfg?.Prompts?.done?.button == nil and U.Keys[Config.Keybinds.Finish]) or cfg.Prompts.done.button,
+			["enabled"] = true,
+			["mode"] = (cfg?.Prompts?.done?.mode == nil and "click") or cfg.Prompts.done.mode,
+			["options"] = (cfg?.Prompts?.done?.options == nil and {tab = 0}) or cfg.Prompts.done.options,
+		},
+		["cancel"] = {
+			["title"] = (cfg?.Prompts?.cancel?.title == nil and _('Cancel')) or cfg.Prompts.cancel.title,
+			["secondTitle"] = cfg?.Prompts?.cancel?.secondTitle,
+			["button"] = (cfg?.Prompts?.cancel?.button == nil and U.Keys[Config.Keybinds.Cancel]) or cfg.Prompts.cancel.button,
+			["enabled"] = true,
+			["mode"] = (cfg?.Prompts?.cancel?.mode == nil and "click") or cfg.Prompts.cancel.mode,
+			["options"] = (cfg?.Prompts?.cancel?.options == nil and {tab = 0}) or cfg.Prompts.cancel.options,
+		},
+		["lr"] = {
+			["title"] = (cfg?.Prompts?.lr?.title == nil and _('Move L/R')) or cfg.Prompts.lr.title,
+			["secondTitle"] = cfg?.Prompts?.lr?.secondTitle,
+			["button"] = (cfg?.Prompts?.lr?.button == nil and U.Keys['A_D']) or cfg.Prompts.lr.button,
+			["enabled"] = (cam and true or false),
+			["mode"] = (cfg?.Prompts?.lr?.mode == nil and "click") or cfg.Prompts.lr.mode,
+			["options"] = (cfg?.Prompts?.lr?.options == nil and {tab = 0}) or cfg.Prompts.lr.options,
+		},
+		["fb"] = {
+			["title"] = (cfg?.Prompts?.fb?.title == nil and _('Move F/B')) or cfg.Prompts.fb.title,
+			["secondTitle"] = cfg?.Prompts?.fb?.secondTitle,
+			["button"] = (cfg?.Prompts?.fb?.button == nil and U.Keys['W_S']) or cfg.Prompts.fb.button,
+			["enabled"] = (cam and true or false),
+			["mode"] = (cfg?.Prompts?.fb?.mode == nil and "click") or cfg.Prompts.fb.mode,
+			["options"] = (cfg?.Prompts?.fb?.options == nil and {tab = 0}) or cfg.Prompts.fb.options,
+		},
+		["up"] = {
+			["title"] = (cfg?.Prompts?.up?.title == nil and _('Move Up')) or cfg.Prompts.up.title,
+			["secondTitle"] = cfg?.Prompts?.up?.secondTitle,
+			["button"] = (cfg?.Prompts?.up?.button == nil and U.Keys['E']) or cfg.Prompts.up.button,
+			["enabled"] = (cam and true or false),
+			["mode"] = (cfg?.Prompts?.up?.mode == nil and "click") or cfg.Prompts.up.mode,
+			["options"] = (cfg?.Prompts?.up?.options == nil and {tab = 0}) or cfg.Prompts.up.options,
+		},
+		["down"] = {
+			["title"] = (cfg?.Prompts?.down?.title == nil and _('Move Down')) or cfg.Prompts.down.title,
+			["secondTitle"] = cfg?.Prompts?.down?.secondTitle,
+			["button"] = (cfg?.Prompts?.down?.button == nil and U.Keys['Q']) or cfg.Prompts.down.button,
+			["enabled"] = (cam and true or false),
+			["mode"] = (cfg?.Prompts?.down?.mode == nil and "click") or cfg.Prompts.down.mode,
+			["options"] = (cfg?.Prompts?.down?.options == nil and {tab = 0}) or cfg.Prompts.down.options,
+		},
+	}
+	
+	if cfg?.Prompts?.custom and #cfg?.Prompts?.custom > 0 then
+		for index, data in ipairs(cfg?.Prompts?.custom) do
+			if data.title and data.button then
+				local thisPrompt = {
+					["title"] = data.title,
+					["secondTitle"] = data.secondTitle,
+					["button"] = data.button,
+					["enabled"] = true,
+					["mode"] = (data.mode == nil and "click") or data.mode,
+					["options"] = (data.options == nil and {tab = 0}) or data.options,
+				}
+				promptSettings["custom_" .. index] = thisPrompt
+			end
+		end
+	end
 
     stored = {
         coords = GetEntityCoords(entity),
@@ -220,18 +307,28 @@ function ToggleGizmo(entity, cfg, allowPlace)
 
     CreateThread(function()
         local PromptGroup = U.Prompts:SetupPromptGroup()
-        local TranslatePrompt = PromptGroup:RegisterPrompt(_('rotate'), U.Keys[Config.Keybinds.ToggleMode], 1, 1, true, 'click', {tab = 0})
-        local SnapToGroundPrompt = PromptGroup:RegisterPrompt(_('Snap To Ground'), U.Keys[Config.Keybinds.SnapToGround], 1, 1, true, 'click', {tab = 0})
-        local DonePrompt = PromptGroup:RegisterPrompt(_('Done Editing'), U.Keys[Config.Keybinds.Finish], 1, 1, true, 'click', {tab = 0})
-        local CancelPrompt = PromptGroup:RegisterPrompt(_('Cancel'), U.Keys[Config.Keybinds.Cancel], 1, 1, true, 'click', {tab = 0})
-        local LRPrompt = PromptGroup:RegisterPrompt(_('Move L/R'), U.Keys['A_D'], (cam and true or false), (cam and true or false), true, 'click', {tab = 0})
-        local FBPrompt = PromptGroup:RegisterPrompt(_('Move F/B'), U.Keys['W_S'], (cam and true or false), (cam and true or false), true, 'click', {tab = 0})
-        local UpPrompt = PromptGroup:RegisterPrompt(_('Move Up'), U.Keys['E'], (cam and true or false), (cam and true or false), true, 'click', {tab = 0})
-        local DownPrompt = PromptGroup:RegisterPrompt(_('Move Down'), U.Keys['Q'], (cam and true or false), (cam and true or false), true, 'click', {tab = 0})
+        local TranslatePrompt = PromptGroup:RegisterPrompt(promptSettings["translate"].title, promptSettings["translate"].button, promptSettings["translate"].enabled, promptSettings["translate"].enabled, true, promptSettings["translate"].mode, promptSettings["translate"].options)
+        local SnapToGroundPrompt = PromptGroup:RegisterPrompt(promptSettings["snap"].title, promptSettings["snap"].button, promptSettings["snap"].enabled, promptSettings["snap"].enabled, true, promptSettings["snap"].mode, promptSettings["snap"].options)
+        local DonePrompt = PromptGroup:RegisterPrompt(promptSettings["done"].title, promptSettings["done"].button, promptSettings["done"].enabled, promptSettings["done"].enabled, true, promptSettings["done"].mode, promptSettings["done"].options)
+        local CancelPrompt = PromptGroup:RegisterPrompt(promptSettings["cancel"].title, promptSettings["cancel"].button, promptSettings["cancel"].enabled, promptSettings["cancel"].enabled, true, promptSettings["cancel"].mode, promptSettings["cancel"].options)
+        local LRPrompt = PromptGroup:RegisterPrompt(promptSettings["lr"].title, promptSettings["lr"].button, promptSettings["lr"].enabled, promptSettings["lr"].enabled, true, promptSettings["lr"].mode, promptSettings["lr"].options)
+        local FBPrompt = PromptGroup:RegisterPrompt(promptSettings["fb"].title, promptSettings["fb"].button, promptSettings["fb"].enabled, promptSettings["fb"].enabled, true, promptSettings["fb"].mode, promptSettings["fb"].options)
+        local UpPrompt = PromptGroup:RegisterPrompt(promptSettings["up"].title, promptSettings["up"].button, promptSettings["up"].enabled, promptSettings["up"].enabled, true, promptSettings["up"].mode, promptSettings["up"].options)
+        local DownPrompt = PromptGroup:RegisterPrompt(promptSettings["down"].title, promptSettings["down"].button, promptSettings["down"].enabled, promptSettings["down"].enabled, true, promptSettings["down"].mode, promptSettings["down"].options)
+		local CustomPrompts = {}
+		if cfg?.Prompts?.custom and #cfg?.Prompts?.custom > 0 then
+			for index, data in ipairs(cfg?.Prompts?.custom) do
+				if data.title and data.button then
+					local prompt = PromptGroup:RegisterPrompt(promptSettings["custom_" .. index].title, promptSettings["custom_" .. index].button, promptSettings["custom_" .. index].enabled, promptSettings["custom_" .. index].enabled, true, promptSettings["custom_" .. index].mode, promptSettings["custom_" .. index].options)
+					table.insert(CustomPrompts, prompt)
+				end
+			end
+		end
+		
 
         while gizmoActive do
             Wait(5)
-            PromptGroup:ShowGroup(_('Gizmo'))
+            PromptGroup:ShowGroup(promptTitle)
 
             if TranslatePrompt:HasCompleted() then
                 mode = (mode == 'translate' and 'rotate' or 'translate')
@@ -240,7 +337,7 @@ function ToggleGizmo(entity, cfg, allowPlace)
                     data = mode
                 })
 
-                TranslatePrompt:PromptText(_U((mode == 'translate' and 'rotate' or 'translate')))
+                TranslatePrompt:PromptText((mode == 'translate' and promptSettings["translate"].title) or promptSettings["translate"].secondTitle)
             end
 
             if SnapToGroundPrompt:HasCompleted() then
@@ -283,6 +380,12 @@ function ToggleGizmo(entity, cfg, allowPlace)
                 Init(false)
 
             end
+			
+			for key, prompt in pairs(CustomPrompts) do
+				if prompt:HasCompleted() then
+					print(key)
+				end
+			end
         end
 
         TranslatePrompt:DeletePrompt()
@@ -292,6 +395,9 @@ function ToggleGizmo(entity, cfg, allowPlace)
         FBPrompt:DeletePrompt()
         UpPrompt:DeletePrompt()
         DownPrompt:DeletePrompt()
+		for key, prompt in pairs(CustomPrompts) do
+			prompt:DeletePrompt()
+		end
     end)
 
     return Citizen.Await(responseData)
@@ -357,8 +463,10 @@ AddEventHandler('onResourceStop', function(resource)
 end)
 
 --- Export ToggleGizmo function
---- @usage exports.gs_gizmo:Toggle(entity, {}, function(position) return true end)
+--- @usage exports.byte_gizmo:Toggle(entity, {}, function(position) return true end)
 exports('Toggle', ToggleGizmo)
 
+--- Export Handler for https://github.com/GlitchOo/gs_gizmo
+ExportHandler('gs_gizmo', 'Toggle', ToggleGizmo)
 --- Export Handler for https://github.com/outsider31000/object_gizmo/tree/main
 ExportHandler('object_gizmo', 'useGizmo', ToggleGizmo)
