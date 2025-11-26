@@ -254,6 +254,7 @@ function ToggleGizmo(entity, cfg, allowPlace)
 					["enabled"] = true,
 					["mode"] = (data.mode == nil and "click") or data.mode,
 					["options"] = (data.options == nil and {tab = 0}) or data.options,
+					["action"] = data.action
 				}
 				promptSettings["custom_" .. index] = thisPrompt
 			end
@@ -320,7 +321,7 @@ function ToggleGizmo(entity, cfg, allowPlace)
 			for index, data in ipairs(cfg?.Prompts?.custom) do
 				if data.title and data.button then
 					local prompt = PromptGroup:RegisterPrompt(promptSettings["custom_" .. index].title, promptSettings["custom_" .. index].button, promptSettings["custom_" .. index].enabled, promptSettings["custom_" .. index].enabled, true, promptSettings["custom_" .. index].mode, promptSettings["custom_" .. index].options)
-					table.insert(CustomPrompts, prompt)
+					table.insert(CustomPrompts, {["index"] = index, ["prompt"] = prompt})
 				end
 			end
 		end
@@ -381,9 +382,18 @@ function ToggleGizmo(entity, cfg, allowPlace)
 
             end
 			
-			for key, prompt in pairs(CustomPrompts) do
-				if prompt:HasCompleted() then
-					print(key)
+			for key, data in pairs(CustomPrompts) do
+				if data.prompt:HasCompleted() then
+					local settings = promptSettings["custom_" .. data.index]
+					if settings.action and settings.action.name and settings.action.type then
+						if settings.action.type == "server_event" then
+							TriggerServerEvent(settings.action.name)
+						elseif settings.action.type == "client_event" then
+							TriggerEvent(settings.action.name)
+						elseif settings.action.type == "export" and settings.action.resource then
+							exports[settings.action.resource][settings.action.name]()
+						end
+					end
 				end
 			end
         end

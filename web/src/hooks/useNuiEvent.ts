@@ -65,7 +65,7 @@ export async function fetchNui<T = unknown>(
     body: JSON.stringify(data),
   };
 
-  const resp = await fetch(`https://gs_gizmo/${eventName}`, options);
+  const resp = await fetch(`https://byte_gizmo/${eventName}`, options);
 
   return (await resp.json()) as T;
 }
