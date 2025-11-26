@@ -405,8 +405,8 @@ function ToggleGizmo(entity, cfg, allowPlace)
         FBPrompt:DeletePrompt()
         UpPrompt:DeletePrompt()
         DownPrompt:DeletePrompt()
-		for key, prompt in pairs(CustomPrompts) do
-			prompt:DeletePrompt()
+		for key, data in pairs(CustomPrompts) do
+			data.prompt:DeletePrompt()
 		end
     end)
 
