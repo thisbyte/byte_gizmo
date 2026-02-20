@@ -343,10 +343,10 @@ function ToggleGizmo(entity, cfg, allowPlace)
 
             if SnapToGroundPrompt:HasCompleted() then
                 PlaceObjectOnGroundProperly(entity)
+				
                 SendNUIMessage({
-                    action = 'SetupGizmo',
+                    action = 'UpdateGizmo',
                     data = {
-                        handle = entity,
                         position = GetEntityCoords(entity),
                         rotation = GetEntityRotation(entity)
                     }

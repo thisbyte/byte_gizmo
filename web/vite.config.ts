@@ -1,29 +1,34 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  base: "./",
-  plugins: [react()],
+  base: './',
+
+  plugins: [
+    react()
+  ],
+
+  resolve: {
+    dedupe: ['react', 'react-dom']
+  },
+
+  optimizeDeps: {
+    include: ['react', 'react-dom']
+  },
+
   build: {
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 1000,
+    sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.indexOf('node_modules') >= 0) {
-            if (id.indexOf('@react-three') >= 0) {
-              return 'index-react-three';
-            }
-            if (id.indexOf('three') >= 0) {
-              return 'index-threejs';
-            }
-            if (id.indexOf('react') >= 0 || id.indexOf('react-dom') >= 0) {
-              return 'index-react';
-            }
-            return 'index';
+          if (id.includes('node_modules')) {
+            if (id.includes('three')) return 'three'
+            if (id.includes('@react-three')) return 'react-three'
+            return 'vendor'
           }
-        },
-      },
-    },
-  },
+        }
+      }
+    }
+  }
 })

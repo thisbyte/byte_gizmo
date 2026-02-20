@@ -69,6 +69,22 @@ export const Transform = () => {
 
   });
 
+  useNuiEvent("UpdateGizmo", (response: any) => {
+    mesh.current.position.set(
+      response.position.x,
+      response.position.z + 0.5,
+      -response.position.y
+    );
+
+    mesh.current.rotation.order = "YZX";
+
+    mesh.current.rotation.set(
+      MathUtils.degToRad(response.rotation.x),
+      MathUtils.degToRad(response.rotation.z),
+      MathUtils.degToRad(-response.rotation.y)
+    );
+  });
+
   useNuiEvent('SetGizmoMode', (editMode: any) => {
     setEditorMode(editMode);
   });
