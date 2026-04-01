@@ -328,7 +328,7 @@ function ToggleGizmo(entity, cfg, allowPlace)
 		
 
         while gizmoActive do
-            Wait(5)
+            Wait(0)
             PromptGroup:ShowGroup(promptTitle)
 
             if TranslatePrompt:HasCompleted() then
